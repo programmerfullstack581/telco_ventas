@@ -1,0 +1,11 @@
+target/
+.m2-repo/
+.tools/
+.mvn/
+*.log
+*.log.err
+*.err
+*.pid
+.git/
+.vscode/
+.idea/

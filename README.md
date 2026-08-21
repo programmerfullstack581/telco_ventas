@@ -189,6 +189,48 @@ ORDER BY v.fecha_registro DESC;
 
 Importa **`docs/Ventas-Telco.postman_collection.json`**. La carpeta `0. Auth` guarda el token automáticamente en variables de colección.
 
+## ☁️ Despliegue en la nube (Vercel + Railway)
+
+Arquitectura: **frontend (React/Vite) en Vercel** + **backend (Spring Boot) en Railway** + **MySQL**.
+El frontend llama a `/api/v1/...` (ruta relativa); Vercel hace proxy de `/api/*` hacia el backend, así no hay problemas de CORS.
+
+### 1) Backend en Railway
+
+1. Entra a [railway.app](https://railway.app) → **New Project** → **Deploy from GitHub repo** → selecciona `telco_ventas`.
+2. En el servicio creado → **Settings**:
+   - **Root Directory**: `backend`
+   - Railway detecta el `Dockerfile` automáticamente.
+3. Agrega MySQL: botón **+ New** → **Database** → **MySQL** (se crea con variables `MYSQLHOST`, `MYSQLPORT`, etc.).
+4. En el servicio del backend → **Variables**, agrega:
+
+   | Variable | Valor |
+   |----------|-------|
+   | `SPRING_PROFILES_ACTIVE` | `prod` |
+   | `DB_URL` | `jdbc:mysql://${{MySQL.MYSQLHOST}}:${{MySQL.MYSQLPORT}}/${{MySQL.MYSQLDATABASE}}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=America/Lima` |
+   | `DB_USER` | `${{MySQL.MYSQLUSER}}` |
+   | `DB_PASSWORD` | `${{MySQL.MYSQLPASSWORD}}` |
+   | `JWT_SECRET` | una cadena larga y aleatoria (ej. `openssl rand -base64 64`) |
+   | `CORS_ORIGINS` | `https://tu-app.vercel.app` (complétalo cuando exista) |
+
+5. **Settings → Networking → Generate Domain**: obtendrás algo como `https://ventas-telco-production.up.railway.app`.
+6. Verifica: `GET https://<tu-backend>.up.railway.app/swagger-ui.html`.
+
+> 💡 Alternativa: usa tu MySQL de Aiven existente cambiando `DB_URL/DB_USER/DB_PASSWORD` por las credenciales de Aiven (`sslMode=REQUIRED`). Así conservas los datos actuales.
+
+### 2) Frontend en Vercel
+
+1. Entra a [vercel.com](https://vercel.com) → **Add New Project** → importa `telco_ventas`.
+2. Configura:
+   - **Root Directory**: `frontend`
+   - Framework Preset: **Vite** (autodetectado)
+3. Antes de desplegar, edita `frontend/vercel.json` y reemplaza `REEMPLAZA-ESTA-URL.up.railway.app` por el dominio real del backend del paso anterior.
+4. **Deploy**. La app quedará en `https://tu-app.vercel.app`.
+5. Vuelve a Railway y completa `CORS_ORIGINS` con esa URL (redespliega).
+
+### 3) Usuarios semilla
+
+En el primer arranque, `DataInitializer` crea automáticamente roles, permisos, planes, distritos y usuarios demo (`admin/Admin*123`, `supervisor1/Sup*123`, `back1/Back*123`, `agente1|agente2/Agente*123`). **Cambia estas contraseñas en producción.**
+
 ## 📁 Estructura del proyecto
 
 ```
