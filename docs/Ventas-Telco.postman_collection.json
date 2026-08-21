@@ -1,0 +1,269 @@
+{
+  "info": {
+    "_postman_id": "telco-ventas-api",
+    "name": "Ventas Telco Fija Hogar - API Collection",
+    "description": "Colección Postman para el flujo de ventas Telco Fija Hogar. Java 21 + Spring Boot 3.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api/v1", "type": "string" },
+    { "key": "tokenAdmin", "value": "", "type": "string" },
+    { "key": "tokenAgente", "value": "", "type": "string" },
+    { "key": "tokenBackoffice", "value": "", "type": "string" },
+    { "key": "tokenSupervisor", "value": "", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "0. Auth",
+      "item": [
+        {
+          "name": "Login Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set(\"tokenAdmin\", jsonData.token);"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"admin\",\"password\":\"Admin*123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login Agente (agente1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set(\"tokenAgente\", jsonData.token);"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"agente1\",\"password\":\"Agente*123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login Backoffice (back1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set(\"tokenBackoffice\", jsonData.token);"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"back1\",\"password\":\"Back*123\"}"
+            }
+          }
+        },
+        {
+          "name": "Login Supervisor (supervisor1)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": ["var jsonData = pm.response.json();", "pm.collectionVariables.set(\"tokenSupervisor\", jsonData.token);"],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{baseUrl}}/auth/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"username\":\"supervisor1\",\"password\":\"Sup*123\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Agente - Ventas",
+      "item": [
+        {
+          "name": "Crear Venta",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenAgente}}" }
+            ],
+            "url": "{{baseUrl}}/ventas",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dniCliente\": \"70123456\",\n  \"nombreCliente\": \"Cliente Prueba\",\n  \"telefonoCliente\": \"901122334\",\n  \"direccionCliente\": \"Calle Test 123, Lima\",\n  \"planActual\": \"Plan Básico 50Mbps\",\n  \"planNuevo\": \"Plan Premium 200Mbps + TV\",\n  \"codigoLlamada\": \"CALL-TEST-{{$randomInt}}\",\n  \"producto\": \"FIJA_HOGAR\",\n  \"monto\": 149.90\n}"
+            }
+          }
+        },
+        {
+          "name": "Mis Ventas (todas)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAgente}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/mis-ventas?page=0&size=10&sort=fechaRegistro,desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "mis-ventas"],
+              "query": [
+                { "key": "estado", "value": "", "disabled": true },
+                { "key": "desde", "value": "", "disabled": true },
+                { "key": "hasta", "value": "", "disabled": true },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "10" },
+                { "key": "sort", "value": "fechaRegistro,desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mis Ventas - PENDIENTE + rango",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenAgente}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/mis-ventas?estado=PENDIENTE&desde=2025-01-01&hasta=2030-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "mis-ventas"],
+              "query": [
+                { "key": "estado", "value": "PENDIENTE" },
+                { "key": "desde", "value": "2025-01-01" },
+                { "key": "hasta", "value": "2030-12-31" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Backoffice - Aprobación",
+      "item": [
+        {
+          "name": "Listar Pendientes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenBackoffice}}" }],
+            "url": "{{baseUrl}}/ventas/pendientes?page=0&size=10"
+          }
+        },
+        {
+          "name": "Aprobar Venta (id=1)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenBackoffice}}" }],
+            "url": "{{baseUrl}}/ventas/1/aprobar"
+          }
+        },
+        {
+          "name": "Rechazar Venta (id=4)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{tokenBackoffice}}" }
+            ],
+            "url": "{{baseUrl}}/ventas/4/rechazar",
+            "body": {
+              "mode": "raw",
+              "raw": "{\"motivoRechazo\":\"Cliente declara no haber solicitado el servicio\"}"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Supervisor - Reportes",
+      "item": [
+        {
+          "name": "Ventas Equipo",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenSupervisor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/equipo?estado=&agenteId=&desde=&hasta=",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "equipo"],
+              "query": [
+                { "key": "estado", "value": "" },
+                { "key": "agenteId", "value": "" },
+                { "key": "desde", "value": "" },
+                { "key": "hasta", "value": "" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen - Rango",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenSupervisor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/reportes/resumen?desde=2025-01-01&hasta=2030-12-31",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "reportes", "resumen"],
+              "query": [
+                { "key": "desde", "value": "2025-01-01" },
+                { "key": "hasta", "value": "2030-12-31" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen - Por Mes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenSupervisor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/reportes/resumen?anio=2026&mes=8",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "reportes", "resumen"],
+              "query": [
+                { "key": "anio", "value": "2026" },
+                { "key": "mes", "value": "8" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Resumen - Por Día",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{tokenSupervisor}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/reportes/resumen?dia=2026-08-14",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "reportes", "resumen"],
+              "query": [
+                { "key": "dia", "value": "2026-08-14" }
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
