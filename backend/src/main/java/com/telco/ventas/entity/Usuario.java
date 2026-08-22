@@ -62,12 +62,12 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        return activo;
+        return Boolean.TRUE.equals(activo);
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return activo;
+        return Boolean.TRUE.equals(activo);
     }
 
     @Override
@@ -77,6 +77,6 @@ public class Usuario implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return activo;
+        return Boolean.TRUE.equals(activo);
     }
 }

@@ -98,11 +98,7 @@ public class DataInitializer implements CommandLineRunner {
         if (distritoRepository.count() == 0) {
             crearDistritosSeed();
         }
-        if (usuarioRepository.count() == 0) {
-            crearUsuariosSeed();
-        } else {
-            backfillRolId();
-        }
+        crearUsuariosSeed();
     }
 
     private void inicializarPermisosYRoles() {
@@ -164,19 +160,41 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void crearUsuariosSeed() {
-        Usuario supervisor1 = crearUsuarioSiNoExiste("supervisor1", "Sup*123", "SUPERVISOR", null);
-        crearUsuarioSiNoExiste("back1", "Back*123", "BACKOFFICE", null);
-        Usuario agente1 = crearUsuarioSiNoExiste("agente1", "Agente*123", "AGENTE", supervisor1.getId());
-        Usuario agente2 = crearUsuarioSiNoExiste("agente2", "Agente*123", "AGENTE", supervisor1.getId());
-        crearUsuarioSiNoExiste("admin", "Admin*123", "ADMIN", null);
+        Usuario supervisor1 = crearOActualizarUsuario("supervisor1", "Sup*123", "SUPERVISOR", null);
+        Usuario back1 = crearOActualizarUsuario("back1", "Back*123", "BACKOFFICE", null);
+        Usuario agente1 = crearOActualizarUsuario("agente1", "Agente*123", "AGENTE", supervisor1.getId());
+        Usuario agente2 = crearOActualizarUsuario("agente2", "Agente*123", "AGENTE", supervisor1.getId());
+        crearOActualizarUsuario("admin", "Admin*123", "ADMIN", null);
 
         if (ventaRepository.count() == 0) {
-            crearVentasSeed(agente1, agente2, back1());
+            crearVentasSeed(agente1, agente2, back1);
         }
     }
 
-    private Usuario back1() {
-        return usuarioRepository.findByUsername("back1").orElseThrow();
+    private Usuario crearOActualizarUsuario(String username, String password, String rolNombre, Long supervisorId) {
+        Long rolId = rolRepository.findByNombre(rolNombre)
+                .map(Rol::getId)
+                .orElse(null);
+        Usuario usuario = usuarioRepository.findByUsername(username).orElse(null);
+        if (usuario == null) {
+            usuario = Usuario.builder()
+                    .username(username)
+                    .password(passwordEncoder.encode(password))
+                    .rolId(rolId)
+                    .supervisorId(supervisorId)
+                    .activo(true)
+                    .build();
+        } else {
+            usuario.setPassword(passwordEncoder.encode(password));
+            if (rolId != null) {
+                usuario.setRolId(rolId);
+            }
+            if (supervisorId != null) {
+                usuario.setSupervisorId(supervisorId);
+            }
+            usuario.setActivo(true);
+        }
+        return usuarioRepository.save(usuario);
     }
 
     private void crearPlanesSeed() {
@@ -217,22 +235,6 @@ public class DataInitializer implements CommandLineRunner {
                 Distrito.builder().nombre("Arequipa").provincia("Arequipa").departamento("Arequipa").codigoUbigeo("040101").activo(true).build(),
                 Distrito.builder().nombre("Trujillo").provincia("Trujillo").departamento("La Libertad").codigoUbigeo("130101").activo(true).build()
         ));
-    }
-
-    private Usuario crearUsuarioSiNoExiste(String username, String password, String rolNombre, Long supervisorId) {
-        return usuarioRepository.findByUsername(username).orElseGet(() -> {
-            Long rolId = rolRepository.findByNombre(rolNombre)
-                    .map(Rol::getId)
-                    .orElseThrow(() -> new IllegalStateException("Rol no encontrado: " + rolNombre));
-            Usuario u = Usuario.builder()
-                    .username(username)
-                    .password(passwordEncoder.encode(password))
-                    .rolId(rolId)
-                    .supervisorId(supervisorId)
-                    .activo(true)
-                    .build();
-            return usuarioRepository.save(u);
-        });
     }
 
     private void crearVentasSeed(Usuario agente1, Usuario agente2, Usuario backoffice) {
