@@ -66,8 +66,8 @@ export default function AppLayout() {
   const sidebar = (
     <div className="flex h-full flex-col bg-slate-950 text-slate-200">
       <div className="flex items-center gap-3 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-400 text-white">
-          <PhoneCall className="h-5 w-5" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-900 overflow-hidden border border-slate-700/50">
+          <img src="/icono.png" alt="Logo" className="h-6 w-6 object-contain" />
         </div>
         <div>
           <p className="text-sm font-bold text-white leading-tight">Ventas Telco</p>

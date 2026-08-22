@@ -34,8 +34,8 @@ export default function Login() {
     <div className="grid min-h-screen place-items-center bg-gradient-to-br from-slate-950 via-blue-900 to-cyan-800 p-4">
       <div className="w-full max-w-md">
         <div className="mb-6 flex items-center justify-center gap-3 text-white">
-          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur">
-            <PhoneCall className="h-6 w-6" />
+          <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 backdrop-blur overflow-hidden border border-white/10">
+            <img src="/icono.png" alt="Logo" className="h-8 w-8 object-contain" />
           </div>
           <div>
             <h1 className="text-xl font-bold leading-tight">Ventas Telco</h1>
