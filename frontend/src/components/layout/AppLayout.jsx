@@ -58,7 +58,8 @@ export default function AppLayout() {
   const { user, logout } = useAuth()
   const [open, setOpen] = useState(false)
   const location = useLocation()
-  const items = NAV_BY_ROL[user?.rol] || []
+  const userRol = (user?.rol || '').toUpperCase().replace('ROLE_', '')
+  const items = NAV_BY_ROL[userRol] || NAV_BY_ROL['ADMIN'] || []
 
   const initials = (user?.username || '?').slice(0, 2).toUpperCase()
   const title = TITLES[location.pathname] || 'Ventas Telco'

@@ -11,23 +11,23 @@ function PrivateRoute({ children, roles }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="grid min-h-screen place-items-center text-muted-foreground">Cargando...</div>
   if (!user) return <Navigate to="/login" replace />
-  if (roles && !roles.includes(user.rol)) return <Navigate to="/" replace />
+  const userRol = (user.rol || '').toUpperCase().replace('ROLE_', '')
+  if (roles && !roles.map(r => r.toUpperCase()).includes(userRol)) {
+    return <Navigate to="/" replace />
+  }
   return children
 }
 
 function RoleRedirect() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  if (user) {
-    const r = user.rol
-    if (r === 'AGENTE') navigate('/agente')
-    else if (r === 'BACKOFFICE') navigate('/backoffice')
-    else if (r === 'SUPERVISOR') navigate('/supervisor')
-    else if (r === 'ADMIN') navigate('/admin')
-  } else {
-    navigate('/login')
-  }
-  return null
+  const { user, loading } = useAuth()
+  if (loading) return <div className="grid min-h-screen place-items-center text-muted-foreground">Cargando...</div>
+  if (!user) return <Navigate to="/login" replace />
+  const r = (user.rol || '').toUpperCase().replace('ROLE_', '')
+  if (r === 'AGENTE') return <Navigate to="/agente" replace />
+  if (r === 'BACKOFFICE') return <Navigate to="/backoffice" replace />
+  if (r === 'SUPERVISOR') return <Navigate to="/supervisor" replace />
+  if (r === 'ADMIN' || r.includes('ADMIN')) return <Navigate to="/admin" replace />
+  return <Navigate to="/admin" replace />
 }
 
 export default function App() {
