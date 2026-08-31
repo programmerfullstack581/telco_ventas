@@ -19,12 +19,17 @@ export default function Login() {
     setErr(''); setLoading(true)
     try {
       const r = await login(form.username, form.password)
-      if (r.rol === 'AGENTE') nav('/agente')
-      else if (r.rol === 'BACKOFFICE') nav('/backoffice')
-      else if (r.rol === 'SUPERVISOR') nav('/supervisor')
+      const rol = (r.rol || '').toUpperCase().replace('ROLE_', '')
+      if (rol === 'AGENTE') nav('/agente')
+      else if (rol === 'BACKOFFICE') nav('/backoffice')
+      else if (rol === 'SUPERVISOR') nav('/supervisor')
       else nav('/admin')
     } catch (e) {
-      setErr(e.response?.data?.message || 'Credenciales inválidas')
+      if (!e.response) {
+        setErr('No se pudo conectar al servidor. Verifique su conexión o intente más tarde.')
+      } else {
+        setErr(e.response?.data?.message || `Error ${e.response?.status}: Credenciales inválidas`)
+      }
     } finally { setLoading(false) }
   }
 
